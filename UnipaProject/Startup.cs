@@ -14,9 +14,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnipaProject.Auth;
+using UnipaProject.Core.Repositories;
+using UnipaProject.Core.Services;
 using UnipaProject.Core.UnitOfWorks;
 using UnipaProject.Data;
+using UnipaProject.Data.Repositories;
 using UnipaProject.Data.UnitOfWorks;
+using UnipaProject.Service;
+using UnipaProject.Service.Services;
 
 namespace UnipaProject
 {
@@ -32,11 +37,19 @@ namespace UnipaProject
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAutoMapper(typeof(Startup));
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            services.AddScoped(typeof(IService<>), typeof(Service.Services.Service<>));
+            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddDbContext<AppDbContext>(options =>
             {
                 options.UseSqlServer(Configuration["ConnectionStrings:SqlConStr"].ToString(), o =>
                 {
+                    
                     o.MigrationsAssembly("UnipaProject.Data");
+
                 });
             });
             services.AddControllers();
@@ -68,7 +81,7 @@ namespace UnipaProject
                     }
                 });
             });
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+          
 
             // yetki
             services.AddAuthentication("BasicAuthentication").AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
